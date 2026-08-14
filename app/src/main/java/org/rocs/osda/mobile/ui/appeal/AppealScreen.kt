@@ -22,9 +22,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.rocs.osda.mobile.data.model.Appeal
-import org.rocs.osda.mobile.ui.common.FilterPill
 import org.rocs.osda.mobile.ui.common.OsdaCard
 import org.rocs.osda.mobile.ui.common.PrimaryButton
+import org.rocs.osda.mobile.ui.common.FilterPill
+import org.rocs.osda.mobile.ui.common.StatCard
 import org.rocs.osda.mobile.ui.common.StatusColors
 import org.rocs.osda.mobile.ui.common.StatusPill
 import org.rocs.osda.mobile.ui.theme.OsdaTokens
@@ -33,6 +34,19 @@ import org.rocs.osda.mobile.ui.theme.OsdaTokens
 @Composable
 fun AppealScreen(viewModel: AppealViewModel) {
     val state by viewModel.uiState.collectAsState()
+
+    if (viewModel.isFilingMode) {
+        FileAppealContent(viewModel)
+    } else {
+        MyAppealsContent(viewModel)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun FileAppealContent(viewModel: AppealViewModel) {
+    val state by viewModel.uiState.collectAsState()
+    val offenseRecord = state.records.firstOrNull { it.recordId == state.selectedRecordId }
 
     PullToRefreshBox(
         isRefreshing = state.isLoading,
@@ -51,24 +65,11 @@ fun AppealScreen(viewModel: AppealViewModel) {
 
             OsdaCard(modifier = Modifier.padding(bottom = 20.dp)) {
                 Text("Offense", fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(bottom = 8.dp))
-
-                if (state.records.isEmpty()) {
-                    Text(
-                        "No offenses on file to appeal.",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                } else {
-                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        state.records.forEach { record ->
-                            FilterPill(
-                                text = "${record.offense.offense} • ${record.dateOfViolation}",
-                                selected = state.selectedRecordId == record.recordId,
-                                onClick = { viewModel.selectRecord(record.recordId) }
-                            )
-                        }
-                    }
-                }
+                Text(
+                    if (offenseRecord != null) "${offenseRecord.offense.offense} • ${offenseRecord.dateOfViolation}" else "Offense not found",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
 
                 Text("Message", fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 16.dp, bottom = 8.dp))
                 OutlinedTextField(
@@ -88,22 +89,59 @@ fun AppealScreen(viewModel: AppealViewModel) {
                 Spacer(Modifier.height(16.dp))
                 PrimaryButton(
                     text = if (state.isSubmitting) "Submitting..." else "Submit Appeal",
-                    enabled = !state.isSubmitting,
+                    enabled = !state.isSubmitting && !state.submitSuccess,
                     onClick = viewModel::submit
                 )
             }
 
-            Text("Appeal History", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(bottom = 12.dp))
+            Spacer(Modifier.height(20.dp))
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun MyAppealsContent(viewModel: AppealViewModel) {
+    val state by viewModel.uiState.collectAsState()
+
+    PullToRefreshBox(
+        isRefreshing = state.isLoading,
+        onRefresh = viewModel::load,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Column(modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
+            Column(modifier = Modifier.padding(top = 4.dp, bottom = 16.dp)) {
+                Text("My Appeals", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Text(
+                    "Create and file offense appeals",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
+                StatCard(state.totalCount.toString(), "Total Filed", MaterialTheme.colorScheme.onBackground, Modifier.weight(1f))
+                StatCard(state.pendingCount.toString(), "Pending", OsdaTokens.amber, Modifier.weight(1f))
+                StatCard(state.approvedCount.toString(), "Approved", OsdaTokens.green, Modifier.weight(1f))
+                StatCard(state.deniedCount.toString(), "Denied", OsdaTokens.red, Modifier.weight(1f))
+            }
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(bottom = 16.dp)) {
+                FilterPill("All", state.filter == AppealFilter.ALL) { viewModel.setFilter(AppealFilter.ALL) }
+                FilterPill("Pending", state.filter == AppealFilter.PENDING) { viewModel.setFilter(AppealFilter.PENDING) }
+                FilterPill("Approved", state.filter == AppealFilter.APPROVED) { viewModel.setFilter(AppealFilter.APPROVED) }
+                FilterPill("Denied", state.filter == AppealFilter.DENIED) { viewModel.setFilter(AppealFilter.DENIED) }
+            }
 
             when {
                 state.isLoading && state.appeals.isEmpty() -> Text("Loading...")
                 state.error != null -> Text(state.error ?: "Something went wrong.", color = MaterialTheme.colorScheme.error)
-                state.appeals.isEmpty() -> Text(
-                    "You haven't filed any appeals yet.",
+                state.filteredAppeals.isEmpty() -> Text(
+                    "No appeals to show.",
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 else -> LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    items(state.appeals) { appeal -> AppealHistoryCard(appeal) }
+                    items(state.filteredAppeals) { appeal -> AppealHistoryCard(appeal) }
                 }
             }
 
@@ -116,7 +154,16 @@ fun AppealScreen(viewModel: AppealViewModel) {
 private fun AppealHistoryCard(appeal: Appeal) {
     val (fg, bg) = StatusColors.forAppeal(appeal.status)
     OsdaCard {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Text(
+            "APPEAL ID: AP-${appeal.appealId.toString().padStart(4, '0')}",
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontWeight = FontWeight.SemiBold,
+            style = MaterialTheme.typography.labelSmall
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
             Text(
                 appeal.record?.offense?.offense ?: "Offense",
                 fontWeight = FontWeight.Bold,
@@ -125,13 +172,19 @@ private fun AppealHistoryCard(appeal: Appeal) {
             StatusPill(appeal.status.replaceFirstChar { it.uppercase() }, fg, bg)
         }
         Text(
+            "Reason:",
+            fontWeight = FontWeight.SemiBold,
+            style = MaterialTheme.typography.labelSmall,
+            modifier = Modifier.padding(top = 8.dp)
+        )
+        Text(
             appeal.message,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.padding(top = 6.dp)
+            modifier = Modifier.padding(top = 2.dp)
         )
         Text(
-            "Filed: ${appeal.dateFiled ?: "—"}",
+            "Submitted ${appeal.dateFiled ?: "—"}",
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.labelSmall,
             modifier = Modifier.padding(top = 6.dp)
