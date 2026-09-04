@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.rocs.osda.mobile.data.model.Appeal
 import org.rocs.osda.mobile.data.model.OffenseRecord
+import org.rocs.osda.mobile.data.model.isPending
+import org.rocs.osda.mobile.data.remote.toUserMessage
 import org.rocs.osda.mobile.data.repository.AppealRepository
 import org.rocs.osda.mobile.data.repository.EnrollmentRepository
 import org.rocs.osda.mobile.data.repository.RecordRepository
@@ -29,13 +31,13 @@ data class AppealUiState(
     val filteredAppeals: List<Appeal>
         get() = when (filter) {
             AppealFilter.ALL -> appeals
-            AppealFilter.PENDING -> appeals.filter { it.status.uppercase() == "PENDING" }
+            AppealFilter.PENDING -> appeals.filter { it.isPending() }
             AppealFilter.APPROVED -> appeals.filter { it.status.uppercase() == "APPROVED" }
             AppealFilter.DENIED -> appeals.filter { it.status.uppercase() == "DENIED" }
         }
 
     val totalCount: Int get() = appeals.size
-    val pendingCount: Int get() = appeals.count { it.status.uppercase() == "PENDING" }
+    val pendingCount: Int get() = appeals.count { it.isPending() }
     val approvedCount: Int get() = appeals.count { it.status.uppercase() == "APPROVED" }
     val deniedCount: Int get() = appeals.count { it.status.uppercase() == "DENIED" }
 }
@@ -68,7 +70,7 @@ class AppealViewModel(
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    error = e.message ?: "Couldn't load your appeals. Please try again."
+                    error = e.toUserMessage("Couldn't load your appeals. Please try again.")
                 )
             }
         }
@@ -82,22 +84,36 @@ class AppealViewModel(
         _uiState.value = _uiState.value.copy(message = value, submitError = null)
     }
 
-    fun submit() {
+    fun validateBeforeConfirm(): Boolean {
         val state = _uiState.value
         val recordId = state.selectedRecordId
         if (recordId == null) {
             _uiState.value = state.copy(submitError = "Please select which offense you're appealing.")
-            return
+            return false
+        }
+        val alreadyHasAppeal = state.appeals.any { it.record?.recordId == recordId }
+        if (alreadyHasAppeal) {
+            _uiState.value = state.copy(
+                submitError = "You already have an appeal on file for this offense."
+            )
+            return false
         }
         if (state.message.isBlank()) {
             _uiState.value = state.copy(submitError = "Please enter a message explaining your appeal.")
-            return
+            return false
         }
-        val currentEnrollmentId = enrollmentId
-        if (currentEnrollmentId == null) {
+        if (enrollmentId == null) {
             _uiState.value = state.copy(submitError = "Couldn't determine your current enrollment. Please try again later.")
-            return
+            return false
         }
+        return true
+    }
+
+    fun submit() {
+        if (!validateBeforeConfirm()) return
+        val state = _uiState.value
+        val recordId = state.selectedRecordId ?: return
+        val currentEnrollmentId = enrollmentId ?: return
 
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isSubmitting = true, submitError = null)
@@ -113,7 +129,7 @@ class AppealViewModel(
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isSubmitting = false,
-                    submitError = e.message ?: "Couldn't submit your appeal. Please try again."
+                    submitError = e.toUserMessage("Couldn't submit your appeal. Please try again.")
                 )
             }
         }

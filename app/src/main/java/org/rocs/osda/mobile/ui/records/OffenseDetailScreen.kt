@@ -49,7 +49,10 @@ fun OffenseDetailScreen(
         Column(modifier = Modifier.fillMaxSize().weight(1f).padding(horizontal = 20.dp)) {
             val (fg, bg) = StatusColors.forRecord(record.status)
             OsdaCard(modifier = Modifier.padding(bottom = 16.dp)) {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
                     Text(
                         "OFFENSE ID: OF-${record.recordId.toString().padStart(4, '0')}",
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -67,7 +70,11 @@ fun OffenseDetailScreen(
             }
 
             OsdaCard(modifier = Modifier.padding(bottom = 16.dp)) {
-                Text("Details", fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 8.dp))
+                Text(
+                    "Details",
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
                 StatRow("Type", record.offense.type ?: "Not on file")
                 Spacer(Modifier.height(8.dp))
                 StatRow("Date of Violation", record.dateOfViolation)
@@ -78,7 +85,11 @@ fun OffenseDetailScreen(
             }
 
             OsdaCard(modifier = Modifier.padding(bottom = 16.dp)) {
-                Text("Disciplinary Action", fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 6.dp))
+                Text(
+                    "Disciplinary Action",
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 6.dp)
+                )
                 Text(
                     record.action?.actionName ?: record.remarks ?: "No action recorded yet.",
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -88,7 +99,8 @@ fun OffenseDetailScreen(
         }
 
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp)) {
-            val canAppeal = record.status.uppercase() == "PENDING"
+            val alreadyAppealed = state.hasActiveAppeal(record.recordId)
+            val canAppeal = record.status.uppercase() == "PENDING" && !alreadyAppealed
             PrimaryButton(
                 text = "File an Appeal",
                 enabled = canAppeal,
@@ -96,7 +108,12 @@ fun OffenseDetailScreen(
             )
             if (!canAppeal) {
                 Text(
-                    "This offense is ${record.status.lowercase()} and can no longer be appealed.",
+                    if (alreadyAppealed)
+                        "You already have an appeal on file for this offense."
+                    else if (record.status.uppercase() == "APPEALED")
+                        "This offense is already under appeal review."
+                    else
+                        "This offense is ${record.status.lowercase()} and can no longer be appealed.",
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.labelSmall,
                     textAlign = TextAlign.Center,

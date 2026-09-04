@@ -23,6 +23,11 @@ private val OsdaGreenBg = Color(0xFFDCF5E3)
 private val OsdaRed = Color(0xFFC22B2B)
 private val OsdaRedBg = Color(0xFFFBDFDF)
 
+private val OsdaBlue = Color(0xFF2B5FC2)
+private val OsdaBlueBg = Color(0xFFDCE8FB)
+private val OsdaChatGradientStart = Color(0xFF4F6BFF)
+private val OsdaChatGradientEnd = Color(0xFF9B4FFF)
+
 private val LightColors = lightColorScheme(
     primary = OsdaPrimary,
     onPrimary = OsdaSurface,
@@ -57,4 +62,9 @@ object OsdaTokens {
     val greenBg = OsdaGreenBg
     val red = OsdaRed
     val redBg = OsdaRedBg
+    val blue = OsdaBlue
+    val blueBg = OsdaBlueBg
+
+    val chatGradientStart = OsdaChatGradientStart
+    val chatGradientEnd = OsdaChatGradientEnd
 }
