@@ -110,10 +110,6 @@ fun FilterPill(text: String, selected: Boolean, onClick: () -> Unit) {
             .defaultMinSize(minHeight = 48.dp)
             .background(bg, RoundedCornerShape(OsdaTokens.pillRadius))
             .let { if (!selected) it.border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(OsdaTokens.pillRadius)) else it }
-            // selectable() (rather than plain clickable()) reports Role.Tab
-            // and the selected state to accessibility services, so a
-            // screen-reader user can tell which filter is currently active --
-            // clickable() alone only exposes the tap action, not the state.
             .selectable(selected = selected, onClick = onClick, role = Role.Tab)
             .padding(horizontal = 14.dp, vertical = 8.dp)
     ) {
@@ -142,9 +138,6 @@ fun OsdaCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.() 
     Column(
         modifier = modifier
             .fillMaxWidth()
-            // Groups every Text/child inside as one accessibility node, so
-            // TalkBack announces a card's content as a single swipe stop
-            // instead of forcing a separate swipe per line of text.
             .semantics(mergeDescendants = true) {}
             .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(OsdaTokens.cardRadius))
             .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(OsdaTokens.cardRadius))
@@ -155,10 +148,6 @@ fun OsdaCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.() 
 
 @Composable
 fun InitialsBadge(initials: String, modifier: Modifier = Modifier) {
-    // Solid primary (dark navy) background with white text -- the same
-    // pairing PrimaryButton uses -- instead of white text over a
-    // low-alpha lavender fill, which didn't have enough contrast against
-    // the light app background to reliably meet WCAG AA for text this size.
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
@@ -179,15 +168,7 @@ fun StatRow(label: String, value: String) {
     }
 }
 
-/**
- * Backend status strings come back SHOUTING_CASE ("PENDING", "APPEALED",
- * "UNDER_REVIEW"). This titlecases them for display ("Pending", "Appealed",
- * "Under review"). Several screens previously did this inconsistently --
- * some called `replaceFirstChar { it.uppercase() }` directly on the
- * already-all-caps string, which is a no-op and left "PENDING" on screen,
- * while others correctly lowercased first. This is the one place that
- * conversion should happen.
- */
+
 fun String.toDisplayStatus(): String =
     lowercase().replace('_', ' ').replaceFirstChar { it.uppercase() }
 

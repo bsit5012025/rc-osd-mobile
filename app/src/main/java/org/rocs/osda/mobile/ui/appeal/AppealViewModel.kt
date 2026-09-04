@@ -31,10 +31,6 @@ data class AppealUiState(
     val filteredAppeals: List<Appeal>
         get() = when (filter) {
             AppealFilter.ALL -> appeals
-            // Includes UNDER_REVIEW as well as PENDING, matching pendingCount
-            // below and the Dashboard/Profile "Pending Appeals" stat -- an
-            // appeal awaiting a decision should count as pending everywhere,
-            // not just here.
             AppealFilter.PENDING -> appeals.filter { it.isPending() }
             AppealFilter.APPROVED -> appeals.filter { it.status.uppercase() == "APPROVED" }
             AppealFilter.DENIED -> appeals.filter { it.status.uppercase() == "DENIED" }

@@ -102,9 +102,6 @@ private fun FileAppealContent(viewModel: AppealViewModel) {
                     text = if (state.isSubmitting) "Submitting..." else "Submit Appeal",
                     enabled = !state.isSubmitting && !state.submitSuccess,
                     onClick = {
-                        // Validate before showing the confirm dialog, not after --
-                        // otherwise a user can confirm "this can't be edited" and
-                        // only then discover their message was required.
                         if (viewModel.validateBeforeConfirm()) {
                             showConfirmDialog = true
                         }
