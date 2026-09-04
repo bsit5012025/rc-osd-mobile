@@ -84,15 +84,6 @@ class AppealViewModel(
         _uiState.value = _uiState.value.copy(message = value, submitError = null)
     }
 
-    /**
-     * Runs the same checks [submit] does, without actually submitting.
-     * Called before showing the "Submit this appeal?" confirmation dialog so
-     * a blank message or an already-appealed record is caught up front,
-     * instead of the user confirming "this can't be edited" and only then
-     * being told the message was required. Returns true (and leaves
-     * [AppealUiState.submitError] untouched) if it's safe to show the
-     * dialog; returns false and sets submitError otherwise.
-     */
     fun validateBeforeConfirm(): Boolean {
         val state = _uiState.value
         val recordId = state.selectedRecordId
@@ -100,9 +91,6 @@ class AppealViewModel(
             _uiState.value = state.copy(submitError = "Please select which offense you're appealing.")
             return false
         }
-        // The backend allows exactly one appeal per offense record, regardless of
-        // that appeal's status (see AppealServiceImpl.submitAppeal) -- so any
-        // existing appeal for this record, approved or not, blocks a resubmission.
         val alreadyHasAppeal = state.appeals.any { it.record?.recordId == recordId }
         if (alreadyHasAppeal) {
             _uiState.value = state.copy(
