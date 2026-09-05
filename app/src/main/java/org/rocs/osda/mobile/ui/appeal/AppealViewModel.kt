@@ -62,7 +62,7 @@ class AppealViewModel(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
             try {
-                val appeals = appealRepository.getMyAppeals()
+                val appeals = appealRepository.getMyAppeals().sortedByDescending { it.dateFiled ?: "" }
                 val records = runCatching { recordRepository.getMyRecords() }.getOrDefault(emptyList())
                 val enrollment = runCatching { enrollmentRepository.getMyLatestEnrollment() }.getOrNull()
                 enrollmentId = enrollment?.enrollmentId
@@ -83,7 +83,6 @@ class AppealViewModel(
     fun onMessageChange(value: String) {
         _uiState.value = _uiState.value.copy(message = value, submitError = null)
     }
-
     fun validateBeforeConfirm(): Boolean {
         val state = _uiState.value
         val recordId = state.selectedRecordId
@@ -119,7 +118,7 @@ class AppealViewModel(
             _uiState.value = _uiState.value.copy(isSubmitting = true, submitError = null)
             try {
                 appealRepository.submitAppeal(recordId, currentEnrollmentId, state.message.trim())
-                val refreshed = appealRepository.getMyAppeals()
+                val refreshed = appealRepository.getMyAppeals().sortedByDescending { it.dateFiled ?: "" }
                 _uiState.value = _uiState.value.copy(
                     isSubmitting = false,
                     submitSuccess = true,

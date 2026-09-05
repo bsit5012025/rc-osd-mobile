@@ -23,6 +23,7 @@ import org.rocs.osda.mobile.ui.common.PrimaryButton
 import org.rocs.osda.mobile.ui.common.StatRow
 import org.rocs.osda.mobile.ui.common.StatusColors
 import org.rocs.osda.mobile.ui.common.StatusPill
+import org.rocs.osda.mobile.ui.common.toDisplayStatus
 
 
 @Composable
@@ -49,17 +50,14 @@ fun OffenseDetailScreen(
         Column(modifier = Modifier.fillMaxSize().weight(1f).padding(horizontal = 20.dp)) {
             val (fg, bg) = StatusColors.forRecord(record.status)
             OsdaCard(modifier = Modifier.padding(bottom = 16.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Text(
                         "OFFENSE ID: OF-${record.recordId.toString().padStart(4, '0')}",
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.SemiBold
                     )
-                    StatusPill(record.status.replaceFirstChar { it.uppercase() }, fg, bg)
+                    StatusPill(record.status.toDisplayStatus(), fg, bg)
                 }
                 Text(
                     record.offense.offense,
@@ -70,26 +68,20 @@ fun OffenseDetailScreen(
             }
 
             OsdaCard(modifier = Modifier.padding(bottom = 16.dp)) {
-                Text(
-                    "Details",
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
+                Text("Details", fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 8.dp))
                 StatRow("Type", record.offense.type ?: "Not on file")
                 Spacer(Modifier.height(8.dp))
                 StatRow("Date of Violation", record.dateOfViolation)
                 Spacer(Modifier.height(8.dp))
+                StatRow("Date of Resolution", record.dateOfResolution ?: "Not yet resolved")
+                Spacer(Modifier.height(8.dp))
                 StatRow("Reported By", record.employee?.fullName ?: "Not on file")
                 Spacer(Modifier.height(8.dp))
-                StatRow("Status", record.status.replaceFirstChar { it.uppercase() })
+                StatRow("Status", record.status.toDisplayStatus())
             }
 
             OsdaCard(modifier = Modifier.padding(bottom = 16.dp)) {
-                Text(
-                    "Disciplinary Action",
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 6.dp)
-                )
+                Text("Disciplinary Action", fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 6.dp))
                 Text(
                     record.action?.actionName ?: record.remarks ?: "No action recorded yet.",
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -108,10 +100,10 @@ fun OffenseDetailScreen(
             )
             if (!canAppeal) {
                 Text(
-                    if (alreadyAppealed)
-                        "You already have an appeal on file for this offense."
-                    else if (record.status.uppercase() == "APPEALED")
+                    if (record.status.uppercase() == "APPEALED")
                         "This offense is already under appeal review."
+                    else if (alreadyAppealed)
+                        "You already have an appeal on file for this offense."
                     else
                         "This offense is ${record.status.lowercase()} and can no longer be appealed.",
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
