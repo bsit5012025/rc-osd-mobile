@@ -51,7 +51,7 @@ class RecordsViewModel(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
             try {
-                val records = recordRepository.getMyRecords()
+                val records = recordRepository.getMyRecords().sortedByDescending { it.dateOfViolation }
                 val appeals = runCatching { appealRepository.getMyAppeals() }.getOrDefault(emptyList())
                 _uiState.value = _uiState.value.copy(isLoading = false, records = records, appeals = appeals)
             } catch (e: Exception) {
