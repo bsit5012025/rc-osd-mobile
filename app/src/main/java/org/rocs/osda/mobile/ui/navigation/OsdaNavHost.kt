@@ -98,7 +98,6 @@ fun OsdaNavHost(app: OsdaApplication, navController: NavHostController = remembe
                 if (state.selectedRecord == null) {
                     OffensesScreen(
                         viewModel = recordsViewModel,
-                        onOpenOffense = { }
                     )
                 } else {
                     OffenseDetailScreen(
@@ -134,7 +133,7 @@ fun OsdaNavHost(app: OsdaApplication, navController: NavHostController = remembe
             OsdaTabScaffold(navController, OsdaTab.PROFILE, app) {
                 ProfileScreen(
                     viewModel = remember {
-                        ProfileViewModel(app.sessionManager, app.enrollmentRepository, app.guardianRepository, app.recordRepository, app.appealRepository)
+                        ProfileViewModel(app.sessionManager, app.enrollmentRepository, app.guardianRepository, app.recordRepository, app.appealRepository, app.themePreferences)
                     }
                 )
             }
@@ -166,10 +165,6 @@ private fun OsdaTabScaffold(
             }
         },
         floatingActionButton = {
-            // Floating chatbot entry point, visible across every tab -- same
-            // idea as Meta AI's floating bubble in Messenger: always
-            // reachable, distinct gradient color so it stands out from the
-            // rest of the (mostly monochrome) app UI.
             FloatingActionButton(
                 onClick = { navController.navigate(Routes.CHAT) },
                 shape = CircleShape,

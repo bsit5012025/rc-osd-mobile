@@ -167,21 +167,21 @@ fun StatRow(label: String, value: String) {
         Text(value, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.SemiBold, fontSize = 11.sp)
     }
 }
-
-
 fun String.toDisplayStatus(): String =
     lowercase().replace('_', ' ').replaceFirstChar { it.uppercase() }
 
 object StatusColors {
+    @Composable
     fun forRecord(status: String): Pair<Color, Color> = when (status.uppercase()) {
         "RESOLVED" -> OsdaTokens.green to OsdaTokens.greenBg
         "APPEALED" -> OsdaTokens.blue to OsdaTokens.blueBg
-        else -> OsdaTokens.amber to OsdaTokens.amberBg // PENDING and anything else reads as "active"
+        else -> OsdaTokens.amber to OsdaTokens.amberBg
     }
 
+    @Composable
     fun forAppeal(status: String): Pair<Color, Color> = when (status.uppercase()) {
         "APPROVED" -> OsdaTokens.green to OsdaTokens.greenBg
         "DENIED" -> OsdaTokens.red to OsdaTokens.redBg
-        else -> OsdaTokens.amber to OsdaTokens.amberBg // PENDING, UNDER_REVIEW
+        else -> OsdaTokens.amber to OsdaTokens.amberBg
     }
 }
