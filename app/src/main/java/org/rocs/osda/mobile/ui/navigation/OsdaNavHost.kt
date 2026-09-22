@@ -129,13 +129,15 @@ fun OsdaNavHost(app: OsdaApplication, navController: NavHostController = remembe
                     viewModelStoreOwner = backStackEntry,
                     factory = viewModelFactory {
                         initializer {
-                            ChatViewModel(app.chatRepository)
+                            ChatViewModel(app.chatRepository, app.recordRepository, app.appealRepository, app.enrollmentRepository)
                         }
                     }
                 )
                 ChatScreen(
                     viewModel = viewModel,
                     onBack = { navController.popBackStack() },
+                    onViewAppeals = { navController.navigate(Routes.appealsRoute()) { tabNavOptions(navController) } },
+                    onViewOffenses = { navController.navigate(Routes.OFFENSES) { tabNavOptions(navController) } }
                 )
             }
 
