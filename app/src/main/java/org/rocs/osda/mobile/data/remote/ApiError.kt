@@ -17,5 +17,5 @@ fun Throwable.toUserMessage(fallback: String): String {
             return parsedMessage
         }
     }
-    return message?.takeIf { it.isNotBlank() } ?: fallback
+    return fallback
 }

@@ -83,6 +83,7 @@ class AppealViewModel(
     fun onMessageChange(value: String) {
         _uiState.value = _uiState.value.copy(message = value, submitError = null)
     }
+
     fun validateBeforeConfirm(): Boolean {
         val state = _uiState.value
         val recordId = state.selectedRecordId
