@@ -45,7 +45,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -427,23 +426,24 @@ private fun MyAppealsContent(viewModel: AppealViewModel) {
 private fun AppealHistoryCard(appeal: Appeal, onEdit: (() -> Unit)? = null) {
     val (fg, bg) = StatusColors.forAppeal(appeal.status)
     OsdaCard {
-        Text(
-            "APPEAL ID: AP-${appeal.appealId.toString().padStart(4, '0')}",
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontWeight = FontWeight.SemiBold,
-            style = MaterialTheme.typography.labelSmall
-        )
         Row(
-            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                appeal.record?.offense?.offense ?: "Offense",
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.titleSmall
+                "APPEAL ID: AP-${appeal.appealId.toString().padStart(4, '0')}",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.SemiBold,
+                style = MaterialTheme.typography.labelSmall
             )
             StatusPill(appeal.status.toDisplayStatus(), fg, bg)
         }
+        Text(
+            appeal.record?.offense?.offense ?: "Offense",
+            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.titleSmall,
+            modifier = Modifier.padding(top = 8.dp)
+        )
         Text(
             "Reason:",
             fontWeight = FontWeight.SemiBold,
@@ -493,5 +493,4 @@ private fun AppealHistoryCard(appeal: Appeal, onEdit: (() -> Unit)? = null) {
             )
         }
     }
-
 }
