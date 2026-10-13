@@ -37,6 +37,8 @@ import org.rocs.osda.mobile.ui.theme.OsdaTokens
 import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
 import org.rocs.osda.mobile.R
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 
 @Composable
 fun LoginScreen(
@@ -54,6 +56,7 @@ fun LoginScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            .verticalScroll(rememberScrollState())
             .padding(24.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -92,7 +95,7 @@ fun LoginScreen(
             )
 
             Text(
-                "STUDENT ID",
+                "STUDENT ID *",
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -108,7 +111,7 @@ fun LoginScreen(
             )
 
             Text(
-                "PASSWORD",
+                "PASSWORD *",
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
