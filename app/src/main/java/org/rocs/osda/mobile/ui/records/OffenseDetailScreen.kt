@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import org.rocs.osda.mobile.util.formatDateTime
 import org.rocs.osda.mobile.ui.common.BackHeader
 import org.rocs.osda.mobile.ui.common.OsdaCard
 import org.rocs.osda.mobile.ui.common.PrimaryButton
@@ -82,7 +83,7 @@ fun OffenseDetailScreen(
                 Text("Details", fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 8.dp))
                 StatRow("Type", record.offense.type ?: "Not on file")
                 Spacer(Modifier.height(8.dp))
-                StatRow("Date of Violation", record.dateOfViolation)
+                StatRow("Date of Violation", formatDateTime(record.dateOfViolation))
                 Spacer(Modifier.height(8.dp))
                 StatRow("Date of Resolution", record.dateOfResolution ?: "Not yet resolved")
                 Spacer(Modifier.height(8.dp))

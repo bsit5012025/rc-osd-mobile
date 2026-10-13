@@ -233,6 +233,16 @@ class AppealViewModel(
             _uiState.value = state.copy(submitError = "Please enter a message explaining your appeal.")
             return false
         }
+        if (state.isUploadingAttachment) {
+            _uiState.value = state.copy(submitError = "Please wait for your file to finish uploading.")
+            return false
+        }
+        if (state.attachmentFileName != null && state.attachmentDocumentId == null) {
+            _uiState.value = state.copy(
+                submitError = "Your attached file did not upload. Remove it or attach it again before submitting."
+            )
+            return false
+        }
         if (enrollmentId == null) {
             _uiState.value = state.copy(submitError = "Couldn't determine your current enrollment. Please try again later.")
             return false

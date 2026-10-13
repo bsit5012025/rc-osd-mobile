@@ -187,7 +187,7 @@ private fun FileAppealContent(viewModel: AppealViewModel, onSubmitted: () -> Uni
             OsdaCard(modifier = Modifier.padding(bottom = 20.dp)) {
                 Text("Offense", fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(bottom = 8.dp))
                 Text(
-                    if (offenseRecord != null) "${offenseRecord.offense.offense} • ${offenseRecord.dateOfViolation}" else "Offense not found",
+                    if (offenseRecord != null) "${offenseRecord.offense.offense} • ${formatDateTime(offenseRecord.dateOfViolation)}" else "Offense not found",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onBackground
                 )

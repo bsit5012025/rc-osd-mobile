@@ -135,7 +135,7 @@ private fun QuickActionRow(title: String, subtitle: String, enabled: Boolean = t
 @Composable
 private fun ActivityRow(item: ActivityItem) {
     val (title, subtitle) = when (item) {
-        is ActivityItem.RecordLogged -> "New Offense Logged" to "${item.record.offense.offense}  •  ${item.record.dateOfViolation}"
+        is ActivityItem.RecordLogged -> "New Offense Logged" to "${item.record.offense.offense}  •  ${formatDateTime(item.record.dateOfViolation)}"
         is ActivityItem.AppealUpdated -> "Appeal ${item.appeal.status.toDisplayStatus()}" to
                 "${item.appeal.record?.offense?.offense ?: "Offense"}  •  ${formatDateTime(item.appeal.dateProcessed ?: item.appeal.dateFiled)}"
     }
