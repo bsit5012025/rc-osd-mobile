@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import org.rocs.osda.mobile.util.formatDateTime
 import org.rocs.osda.mobile.data.model.OffenseRecord
 import org.rocs.osda.mobile.ui.common.FilterPill
 import org.rocs.osda.mobile.ui.common.OsdaCard
@@ -108,7 +109,7 @@ private fun OffenseCard(record: OffenseRecord, onClick: () -> Unit) {
             modifier = Modifier.padding(top = 6.dp)
         )
         Text(
-            "Filed: ${record.dateOfViolation}",
+            "Filed: ${formatDateTime(record.dateOfViolation)}",
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.labelSmall,
             modifier = Modifier.padding(top = 4.dp)

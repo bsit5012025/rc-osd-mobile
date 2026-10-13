@@ -5,8 +5,8 @@ import java.util.Locale
 
 private val inputDateTime = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
 private val inputDate = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-private val outputDate = SimpleDateFormat("MMM d, yyyy", Locale.US)
-private val outputDateTime = SimpleDateFormat("MMM d, yyyy · h:mm a", Locale.US)
+private val outputDate = SimpleDateFormat("MM/dd/yyyy", Locale.US)
+private val outputDateTime = SimpleDateFormat("MM/dd/yyyy · h:mm a", Locale.US)
 
 fun formatDateTime(value: String?): String {
     if (value.isNullOrBlank()) return "—"
